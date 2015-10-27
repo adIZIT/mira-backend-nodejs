@@ -15,5 +15,10 @@
   "bugs": {
     "url": "https://github.com/adIZIT/mira-backend-nodejs/issues"
   },
-  "homepage": "https://github.com/adIZIT/mira-backend-nodejs"
+  "homepage": "https://github.com/adIZIT/mira-backend-nodejs",
+  "dependencies": {
+    "body-parser": "^1.14.1",
+    "express": "^4.13.3",
+    "mssql": "^2.3.1"
+  }
 }
