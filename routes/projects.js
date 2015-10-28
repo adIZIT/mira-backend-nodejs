@@ -97,6 +97,7 @@ router.route('/projects').post(function(req, res) {
 // Update van een project
 router.route('/projects/:id').put(function(req, res) {
 	console.log('PUT project id:' + req.params.id);
+	console.log(req.body);
 	var connection = new sql.Connection(config, function(err) {
 		if (err) {
 			res.json('Error on connection');
