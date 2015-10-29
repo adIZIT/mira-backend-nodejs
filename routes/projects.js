@@ -16,6 +16,8 @@ var config = {
 // Geeft een lijst van alle projecten 
 router.route('/projects').get(function(req, res) {
 	console.log('GET /projects');
+	console.log(req);
+	
 	var connection = new sql.Connection(config, function(err) {
 		if (err) {
 			res.json('Error on connection');
