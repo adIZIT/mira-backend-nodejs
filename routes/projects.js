@@ -1,16 +1,7 @@
 var express = require('express');
 var sql 	= require('mssql');
+var config  = require('../config');
 var router 	= express.Router();
-
-var config = {
-		user: 'izitbvba@outlook.com@mira-izit',
-		password: '1Z1Taoutlook',
-		server: 'mira-izit.database.windows.net',
-		database: 'mira-izit',
-		options: {
-			encrypt: true // nodig om te connecteren met Windows Azure
-		}
-	}
 
 // GET: /projects/
 // Geeft een lijst van alle projecten 
@@ -18,7 +9,7 @@ router.route('/projects').get(function(req, res) {
 	console.log('GET /projects');
 	console.log(req);
 	
-	var connection = new sql.Connection(config, function(err) {
+	var connection = new sql.Connection(config.dbCustomers, function(err) {
 		if (err) {
 			res.json('Error on connection');
 		};
@@ -41,7 +32,7 @@ router.route('/projects').get(function(req, res) {
 // Geeft 1 specifiek object terug
 router.route('/projects/:id').get(function(req, res) {
 	console.log('GET /projects/' + req.params.id);
-	var connection = new sql.Connection(config, function(err) {
+	var connection = new sql.Connection(config.dbCustomers, function(err) {
 		if (err) {			
 			res.json('Error on connection');
 		};
@@ -62,7 +53,7 @@ router.route('/projects').post(function(req, res) {
 	console.log('------------------------------');
 	console.log(req.body);
 	console.log('------------------------------');
-	var connection = new sql.Connection(config, function(err) {
+	var connection = new sql.Connection(config.dbCustomers, function(err) {
 		if (err) {
 			res.json('Error on connection');
 		};
@@ -100,7 +91,7 @@ router.route('/projects').post(function(req, res) {
 router.route('/projects/:id').put(function(req, res) {
 	console.log('PUT project id:' + req.params.id);
 	console.log(req.body);
-	var connection = new sql.Connection(config, function(err) {
+	var connection = new sql.Connection(config.dbCustomers, function(err) {
 		if (err) {
 			res.json('Error on connection');
 		};
@@ -139,7 +130,7 @@ router.route('/projects/:id').put(function(req, res) {
 router.route('/projects/:id').delete(function(req, res) {
 	console.log('DELETE /projects/' + req.params.id);	
 	
-	var connection = new sql.Connection(config, function(err) {
+	var connection = new sql.Connection(config.dbCustomers, function(err) {
 		if (err) {
 			res.json('Error on connection');
 		};
