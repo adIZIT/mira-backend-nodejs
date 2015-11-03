@@ -5,6 +5,7 @@ var jwt         = require('jsonwebtoken');
 var projects    = require('./routes/projects');
 var config      = require('./config');
 var sql 		= require('mssql');
+var morgan		= require('morgan');
 
 // Express applicatie initialiseren
 var app         = express();
@@ -15,6 +16,8 @@ app.set('supersecret', config.secret);
 // de express app configureren dat deze bodyParser moet gebruiken om zo de body uit de POST requests te halen
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+
+app.use(morgan('dev'));
 
 // De poort waarop de webserver runt
 var port = process.env.PORT || 1337;
@@ -52,7 +55,7 @@ router.post('/authenticate', function(req, res) {
 								res.json({ success: false, message: 'Authentication failed. Wrong password' });
 							} else {
 								var token = jwt.sign(recordset, app.get('supersecret'), {
-									expiresInMinutes: 1440
+									expiresIn: 1440
 								});
 								
 								res.json({
@@ -83,7 +86,7 @@ app.use(function(req, res, next) {
 	else 
 	{
 		// header, url of post parameters nakijken of de token aanwezig is
-		var token = req.body.token || req.param('token') || req.headers['x-access-token'];
+		var token = req.body.token || req.params.token || req.headers['x-access-token'];
 		
 		// Decode token
 		if (token) {
@@ -93,6 +96,7 @@ app.use(function(req, res, next) {
 					return res.json({ success: false, message: 'Failed to authenticate token'});    
 				} else {
 					// Indien de token geldig is verder gaan met de request
+					console.log(decoded);
 					req.decoded = decoded;
 					next();
 				}            

@@ -5,10 +5,7 @@ var router 	= express.Router();
 
 // GET: /projects/
 // Geeft een lijst van alle projecten 
-router.route('/projects').get(function(req, res) {
-	console.log('GET /projects');
-	console.log(req);
-	
+router.route('/projects').get(function(req, res) {	
 	var connection = new sql.Connection(config.dbCustomers, function(err) {
 		if (err) {
 			res.json('Error on connection');
@@ -20,8 +17,7 @@ router.route('/projects').get(function(req, res) {
 		}
 		
 		var request = new sql.Request(connection);
-		var query = 'select * from tbl_projects' + where;
-		console.log(query);
+		var query = 'select * from tbl_projects' + where;		
 		request.query(query, function(err, recordset) {
 			res.json(recordset);
 		});
@@ -30,16 +26,14 @@ router.route('/projects').get(function(req, res) {
 
 // GET: /projects/:id
 // Geeft 1 specifiek object terug
-router.route('/projects/:id').get(function(req, res) {
-	console.log('GET /projects/' + req.params.id);
+router.route('/projects/:id').get(function(req, res) {	
 	var connection = new sql.Connection(config.dbCustomers, function(err) {
 		if (err) {			
 			res.json('Error on connection');
 		};
 	
 		var request = new sql.Request(connection);
-		var query = 'select * from tbl_projects where id = ' + req.params.id;
-		console.log(query);
+		var query = 'select * from tbl_projects where id = ' + req.params.id;	
 		request.query(query, function(err, recordset) {
 			res.json(recordset);
 		});
@@ -48,11 +42,7 @@ router.route('/projects/:id').get(function(req, res) {
 
 // POST: /projects
 // Toevoegen van een project
-router.route('/projects').post(function(req, res) {
-	console.log('POST /projects/');
-	console.log('------------------------------');
-	console.log(req.body);
-	console.log('------------------------------');
+router.route('/projects').post(function(req, res) {	
 	var connection = new sql.Connection(config.dbCustomers, function(err) {
 		if (err) {
 			res.json('Error on connection');
@@ -75,8 +65,7 @@ router.route('/projects').post(function(req, res) {
 					if (err) {
 						res.send(err);
 					}
-					else { 
-						console.log('Project successfully added');
+					else { 		
 						res.send('Project successfully added');					
 					}
 				});
@@ -88,9 +77,7 @@ router.route('/projects').post(function(req, res) {
 
 // PUT: /projects
 // Update van een project
-router.route('/projects/:id').put(function(req, res) {
-	console.log('PUT project id:' + req.params.id);
-	console.log(req.body);
+router.route('/projects/:id').put(function(req, res) {	
 	var connection = new sql.Connection(config.dbCustomers, function(err) {
 		if (err) {
 			res.json('Error on connection');
@@ -115,8 +102,7 @@ router.route('/projects/:id').put(function(req, res) {
 					if (err) {
 						res.send(err);
 					}
-					else { 
-						console.log('UPDATE project with id ' + req.params.id + " is succesfully executed"); 
+					else { 						 
 						res.send('UPDATE project with id ' + req.params.id + " is succesfully executed"); 
 					}
 				});
