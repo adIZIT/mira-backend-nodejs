@@ -14,7 +14,7 @@ router.route('/projects').get(function(req, res) {
 		
 		// Indien een filter wordt toegepast 
 		if (req.query.filter) {
-			
+			// localhost/projects?filter={include:[customer]}
 		}
 		
 		var where = "";
@@ -26,10 +26,15 @@ router.route('/projects').get(function(req, res) {
 		var query = 'select p.Id as "projectId", p.Name as "projectName", p.Remarks as "projectRemarks", p.IsActive as "projectIsActive", p.Barcode as "projectBarcode", c.Id as "customerId", '
 				  + 'c.Name as "customerName" from tbl_projects p left join tbl_customers c on c.Id = p.Customer_Id ' + where;		
 		request.query(query, function(err, recordset) {
+			console.log(recordset);
 			res.json(recordset);
 		});
 	});
 });
+
+function generateJsonFromRecordset(recordset, callback) {
+	
+}
 
 // GET: /projects/:id
 // Geeft 1 specifiek object terug
