@@ -6,6 +6,9 @@ var projects    = require('./routes/projects');
 var config      = require('./config');
 var sql 		= require('mssql');
 var morgan		= require('morgan');
+var pem			= require('pem');
+var https		= require('https');
+var fs			= require('fs');
 
 // Express applicatie initialiseren
 var app         = express();
@@ -120,5 +123,10 @@ app.use('/api', projects);
 
 // Start de server
 // ===================================================================
-app.listen(port);
+// Certificaat aanmaken om zo via https te kunnen werken
+https.createServer({
+	key: fs.readFileSync('key.pem'),
+	cert: fs.readFileSync('cert.pem')
+}, app).listen(port);
+//app.listen(port);
 console.log('Server listening on port ' + port);
