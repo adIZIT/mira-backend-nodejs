@@ -1,6 +1,7 @@
 var express 	= require('express');
 var sql 		= require('mssql');
 var config  	= require('../config');
+var validator	= require('validator');
 var router 		= express.Router();
 
 // GET: /projects/
@@ -43,20 +44,11 @@ router.route('/projects/:id').get(function(req, res) {
 // POST: /projects
 // Toevoegen van een project
 router.route('/projects').post(function(req, res) {	
-	
-	req.assert('Name', 'Project name is required').notEmpty();
-	req.assert('Code', 'Project code is required').notEmpty();
-	var errors = req.validationErrors();
-	console.log(errors);
-	// var errors = [];
-	// // Validatie
-	// if (req.body.Name == "") {
-	// 	console.log("empty project name");
-	// 	errors.push({ "status": 400, "message:": "The name of a project is required", "code": "20000" });
-	// 	res.status(400).send({"errors": errors});
-	// }
-	// else 
-	// {
+	validateProject(req.body, function(project, err) {
+		if (err) {
+			res.status(400).send(err);
+			return;
+		}
 		
 		var connection = new sql.Connection(config.dbCustomers, function(err) {
 			if (err) {
@@ -72,9 +64,9 @@ router.route('/projects').post(function(req, res) {
 			
 			ps.prepare(query, function(err) {
 				ps.execute({ 
-					Name: req.body.Name,
-					Remarks: req.body.Remarks,
-					Barcode: req.body.Code
+					Name: project.Name,
+					Remarks: project.Remarks,
+					Barcode: project.Code
 				}, function(err, recordset) {
 					ps.unprepare(function(err) {
 						if (err) {
@@ -87,9 +79,132 @@ router.route('/projects').post(function(req, res) {
 				});
 			});		
 		});
-	//}
+	});
+});
+
+function validateProject(project, callback) {
+	// Lijst die alle errors bevat na validatie
+	var errors = [];
 	
-})
+	
+	// Alle values van het project object trimmen zodat alle whitespaces weg zijn
+	if (project.Name) { project.Name = validator.trim(project.Name); }
+	if (project.Code) { project.Code = validator.trim(project.Code); }
+	if (project.Remarks) { project.Remarks = validator.trim(project.Remarks); }
+	
+	// Controle of de naam van een project ingevuld is
+	if (validator.isNull(project.Name)) {
+		errors.push({ 'status': 400, 'message': 'Project name is required', 'code': '21001' });
+	}
+	
+	// Controle of de code van een project ingevuld is
+	if (validator.isNull(project.Code)) {
+		errors.push({ 'status': 400, 'message': 'Project code is required', 'code': '21002' });
+	} else {
+		// Controle of de code Alfanumeriek is
+		if (!validator.isAlphanumeric(project.Code)) {
+			errors.push({ 'status': 400, 'message': 'Project code must be alphanumeric', 'code': '21005' });
+		}
+	}
+	
+	// Als voorgaande validatie geen error bevat dan wordt er in de database gekeken of er al een project met die naam of code bestaat
+	
+	if (errors.length == 0) {
+		checkProjectNameExists(project.Name, function(err) {
+			if (err) {
+				errors.push(err);
+			}
+			checkProjectCodeExists(project.Code, function(err) {
+				if (err) {
+					errors.push(err);
+				}				
+				if (errors.length > 0) {
+					callback(project, { 'errors': errors });
+				} else {
+					callback(project);	
+				}				
+			})
+		});
+	}
+	else {
+		if (typeof callback === 'function') {
+			if (errors.length > 0) {
+				callback(project, { 'errors': errors });
+			} else {
+				callback(project);	
+			}	
+		}
+	}
+	
+}
+
+function checkProjectNameExists(projectname, callback) {
+	var connection = new sql.Connection(config.dbCustomers, function(err) {
+		if (err) {
+			console.log(err);
+		};
+			
+		var ps = new sql.PreparedStatement(connection);
+		ps.input('Name', sql.VarChar(50));
+		var query = 'select count(Id) as c from tbl_projects where Name = @Name';
+			
+		ps.prepare(query, function(err) {
+			ps.execute({ 
+				Name: projectname.toLowerCase()
+			}, function(err, recordset) {
+				ps.unprepare(function(err) {
+					if (err) {
+						console.log(err);
+					}
+					else {							
+													
+						if (recordset[0].c > 0) {
+							var error = ({ 'status': 400, 'message': 'Project name already exists', 'code': '21003' });
+							callback(error);
+						}
+						else {
+							callback()	
+						}																							
+					}
+				});				
+			});
+		});	
+	});
+}
+
+function checkProjectCodeExists(projectcode, callback) {
+	var connection = new sql.Connection(config.dbCustomers, function(err) {
+		if (err) {
+			console.log(err);
+		};
+			
+		var ps = new sql.PreparedStatement(connection);
+		ps.input('Code', sql.VarChar(50));
+		var query = 'select count(Id) as c from tbl_projects where Barcode = @Code';
+			
+		ps.prepare(query, function(err) {
+			ps.execute({ 
+				Code: projectcode.toLowerCase()
+			}, function(err, recordset) {
+				ps.unprepare(function(err) {
+					if (err) {
+						console.log(err);
+					}
+					else {							
+													
+						if (recordset[0].c > 0) {
+							var error = ({ 'status': 400, 'message': 'Project code already exists', 'code': '21004' });
+							callback(error);
+						}
+						else {
+							callback()	
+						}																							
+					}
+				});				
+			});
+		});	
+	});
+}
 
 
 // PUT: /projects
