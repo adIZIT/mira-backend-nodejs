@@ -1,7 +1,7 @@
-var express = require('express');
-var sql 	= require('mssql');
-var config  = require('../config');
-var router 	= express.Router();
+var express 	= require('express');
+var sql 		= require('mssql');
+var config  	= require('../config');
+var router 		= express.Router();
 
 // GET: /projects/
 // Geeft een lijst van alle projecten 
@@ -43,35 +43,52 @@ router.route('/projects/:id').get(function(req, res) {
 // POST: /projects
 // Toevoegen van een project
 router.route('/projects').post(function(req, res) {	
-	var connection = new sql.Connection(config.dbCustomers, function(err) {
-		if (err) {
-			res.json('Error on connection');
-		};
+	
+	req.assert('Name', 'Project name is required').notEmpty();
+	req.assert('Code', 'Project code is required').notEmpty();
+	var errors = req.validationErrors();
+	console.log(errors);
+	// var errors = [];
+	// // Validatie
+	// if (req.body.Name == "") {
+	// 	console.log("empty project name");
+	// 	errors.push({ "status": 400, "message:": "The name of a project is required", "code": "20000" });
+	// 	res.status(400).send({"errors": errors});
+	// }
+	// else 
+	// {
 		
-		var ps = new sql.PreparedStatement(connection);
-		ps.input('Name', sql.VarChar(50));
-		ps.input('Remarks', sql.VarChar(50));
-		ps.input('Barcode', sql.VarChar(50));
-
-		var query = 'insert into tbl_projects (Name, Remarks, IsActive, Barcode) values (@Name, @Remarks, 1, @Barcode)';
-		
-		ps.prepare(query, function(err) {
-			ps.execute({ 
-				Name: req.body.Name,
-				Remarks: req.body.Remarks,
-				Barcode: req.body.Barcode
-			}, function(err, recordset) {
-				ps.unprepare(function(err) {
-					if (err) {
-						res.send(err);
-					}
-					else { 		
-						res.send('Project successfully added');					
-					}
+		var connection = new sql.Connection(config.dbCustomers, function(err) {
+			if (err) {
+				res.json('Error on connection');
+			};
+			
+			var ps = new sql.PreparedStatement(connection);
+			ps.input('Name', sql.VarChar(50));
+			ps.input('Remarks', sql.VarChar(50));
+			ps.input('Barcode', sql.VarChar(50));
+	
+			var query = 'insert into tbl_projects (Name, Remarks, IsActive, Barcode) values (@Name, @Remarks, 1, @Barcode)';
+			
+			ps.prepare(query, function(err) {
+				ps.execute({ 
+					Name: req.body.Name,
+					Remarks: req.body.Remarks,
+					Barcode: req.body.Code
+				}, function(err, recordset) {
+					ps.unprepare(function(err) {
+						if (err) {
+							res.send(err);
+						}
+						else { 		
+							res.send('Project successfully added');					
+						}
+					});
 				});
-			});
-		});		
-	});
+			});		
+		});
+	//}
+	
 })
 
 

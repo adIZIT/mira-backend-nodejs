@@ -9,6 +9,7 @@ var morgan		= require('morgan');
 var pem			= require('pem');
 var https		= require('https');
 var fs			= require('fs');
+var validator 	= require('express-validator');
 
 // Express applicatie initialiseren
 var app         = express();
@@ -19,6 +20,7 @@ app.set('supersecret', config.secret);
 // de express app configureren dat deze bodyParser moet gebruiken om zo de body uit de POST requests te halen
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+app.use(validator());
 
 app.use(morgan('dev'));
 
