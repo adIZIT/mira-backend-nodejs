@@ -12,13 +12,19 @@ router.route('/projects').get(function(req, res) {
 			res.json('Error on connection');
 		};
 		
+		// Indien een filter wordt toegepast 
+		if (req.query.filter) {
+			
+		}
+		
 		var where = "";
 		if (req.query.name) {
 			where += ' where name like \'%' + req.query.name + '%\'';
 		}
 		
 		var request = new sql.Request(connection);
-		var query = 'select * from tbl_projects' + where;		
+		var query = 'select p.Id as "projectId", p.Name as "projectName", p.Remarks as "projectRemarks", p.IsActive as "projectIsActive", p.Barcode as "projectBarcode", c.Id as "customerId", '
+				  + 'c.Name as "customerName" from tbl_projects p left join tbl_customers c on c.Id = p.Customer_Id ' + where;		
 		request.query(query, function(err, recordset) {
 			res.json(recordset);
 		});
@@ -135,7 +141,6 @@ function validateProject(project, callback) {
 			}	
 		}
 	}
-	
 }
 
 function checkProjectNameExists(projectname, callback) {
