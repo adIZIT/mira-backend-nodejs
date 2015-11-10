@@ -2,7 +2,27 @@ var express 	= require('express');
 var sql 		= require('mssql');
 var config  	= require('../config');
 var validator	= require('validator');
+var dbinfo		= require('../dbinfo');
 var router 		= express.Router();
+
+/*
+	======== ALGEMEEN ========
+	GET:	/projects		Geeft een lijst van alle projecten
+	GET:	/projects/:id	Geeft een project met een specifiek Id
+	POST:	/projects		Toevoegen van een nieuw project
+	PUT:	/projects		Update van een bestaand project
+	DELETE: /projects/:id	Verwijderen van een project
+	
+	======== EXTRA ========
+	GET:	/projects/:id/Customer		Ophalen van een klant van een project
+	
+	======== FILTERS =========
+	include:	customer		syntax: filter={include:'customer'}
+										filter={include:['customer', '...', ...]}
+	where:						syntax:	filter={where:{property: value}}
+										filter:{where:{property: {op: value}}}
+										filter:{where:{property: {: value}, property2: value2}}
+*/
 
 // GET: /projects/
 // Geeft een lijst van alle projecten 
@@ -12,28 +32,84 @@ router.route('/projects').get(function(req, res) {
 			res.json('Error on connection');
 		};
 		
+		var fields = [];
+		
+		for(var i=0; i<dbinfo.project.columns.length; i++) {
+			fields.push(dbinfo.project.columns[i]);	
+		}
+
+		var joins = ''
+		var selectColumns = '';
+		
 		// Indien een filter wordt toegepast 
 		if (req.query.filter) {
-			// localhost/projects?filter={include:[customer]}
+			// Controle op include			
+			var filter = JSON.parse(req.query.filter);
+			if (filter.include) {				
+				// Nakijken of de include het veld "customer" bevat om zo de joins te kunnen implementeren
+				if (filter.include === 'customer') {	
+					for(var i=0; i<dbinfo.customer.columns.length; i++) {
+						fields.push(dbinfo.customer.columns[i]);	
+					}
+					joins += 'left join tbl_customers c on c.Id = p.Customer_Id ';
+				}	
+			}
+						
+			// Controle op where
+			if (filter.where) {
+				
+			}
+			
+			// Controle op order
+			if (filter.order) {
+				
+			}
 		}
 		
-		var where = "";
-		if (req.query.name) {
-			where += ' where name like \'%' + req.query.name + '%\'';
+		// Alle kolommen doorlopen die in de select moeten zitten
+		for(var i=0; i<fields.length; i++) {
+			selectColumns += fields[i].colName + " as '" + fields[i].alias + "'";
+			if (i != fields.length - 1) {
+				selectColumns += ', ';
+			}
 		}
 		
+		var query = 'select '
+				  + selectColumns 				 
+				  + 'from tbl_projects p '
+				  + joins;
+		console.log(query);
 		var request = new sql.Request(connection);
-		var query = 'select p.Id as "projectId", p.Name as "projectName", p.Remarks as "projectRemarks", p.IsActive as "projectIsActive", p.Barcode as "projectBarcode", c.Id as "customerId", '
-				  + 'c.Name as "customerName" from tbl_projects p left join tbl_customers c on c.Id = p.Customer_Id ' + where;		
+			
 		request.query(query, function(err, recordset) {
-			console.log(recordset);
-			res.json(recordset);
+			generateJsonFromRecordset(recordset, function(projects) {
+				console.log(projects);
+				res.json(projects);
+			});
 		});
 	});
 });
 
 function generateJsonFromRecordset(recordset, callback) {
+	var projects = [];
+
+	for(var i=0; i<recordset.length; i++) {
+		var p = {
+			"Id": recordset[i].projectId,
+			"Name": recordset[i].projectName,
+			"Remarks": recordset[i].projectRemarks,
+			"Code": recordset[i].projectCode
+		}
+		if (recordset[i].customerId) {
+			p.customer = {
+				"Id": recordset[i].customerId,
+				"Name": recordset[i].customerName
+			}
+		}
+		projects.push(p);
+	}
 	
+	callback(projects);
 }
 
 // GET: /projects/:id
