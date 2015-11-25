@@ -1,19 +1,30 @@
 module.exports = {	
 	project: {
 		table: 'tbl_projects',
+		tableAlias: 'p',
 		columns: [
-			{ "colName": "p.Id", "alias": "projectId" },
-			{ "colName": "p.Name", "alias": "projectName" },
-			{ "colName": "p.Barcode", "alias": "projectCode" },
-			{ "colName": "p.Remarks", "alias": "projectRemarks" },
-			{ "colName": "p.IsActive", "alias": "projectIsActive" }			
+			{ "columnName": "id", "alias": "projectId" },
+			{ "columnName": "name", "alias": "projectName" },
+			{ "columnName": "code", "alias": "projectCode" },
+			{ "columnName": "remarks", "alias": "projectRemarks" }						
+		],
+		relations: [
+			{ 
+				"customer": {
+					"type": "belongsTo",
+					"model": "customer",
+					"foreignKey": "customerId"	
+				}			
+			}
 		]
 	},
 	customer: {
 		table: 'tbl_customers', 
+		tableAlias: 'c',
+		identityfield: 'id',
 		columns: [
-			{ "colName": "c.Id", "alias": "customerId" },
-			{ "colName": "c.Name", "alias": "customerName" }
+			{ "colName": "id", "alias": "customerId" },
+			{ "colName": "name", "alias": "customerName" }
 		]
 	}	
 }

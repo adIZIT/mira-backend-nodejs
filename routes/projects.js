@@ -21,8 +21,21 @@ var router 		= express.Router();
 										filter={include:['customer', '...', ...]}
 	where:						syntax:	filter={where:{property: value}}
 										filter:{where:{property: {op: value}}}
-										filter:{where:{property: {: value}, property2: value2}}
+										filter:{where:[{property: {: value}, {property2: value2}]}
+	order:						syntax: filter:{order: {property:  }}
+
 */
+
+var order = [
+	{
+		'field': '',
+		'orderType': ''
+	},
+	{
+		'field': '',
+		'orderType': ''
+	}
+]
 
 // GET: /projects/
 // Geeft een lijst van alle projecten 
@@ -62,6 +75,11 @@ router.route('/projects').get(function(req, res) {
 			
 			// Controle op order
 			if (filter.order) {
+				
+			}
+			
+			// Controle op limit
+			if (filter.limit) {
 				
 			}
 		}
