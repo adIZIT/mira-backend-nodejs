@@ -26,14 +26,26 @@ module.exports = {
 			'customer',
 			'customer.address'
 		],
-		where: [
-			{
-				'customer.name': 'Ad',
-				'remarks': {
-					'like': 'Test'
-				}
-			}
+		where: [			
+			[
+				{ 'customer.name': 'Ad' },
+				{ 'remarks': { 'like': 'Test'} }
+			]
 		],
+		where2: {			 
+			'or': [
+					{
+						'and': [ 
+							{ 'field1': 'foo' }, 
+							{ 'field2': { 'like': 'bar' } } 
+						]
+					},
+					{
+						'field3': 'bla'
+					}	
+			]
+					
+		},
 		order: [
 			{ 'id': 'desc'},
 			{ 'name': 'asc'}	
@@ -42,6 +54,12 @@ module.exports = {
 			
 		}
 	},
+	test: {
+		"or": [
+			"and": [ {"field1": "foo"}, {"field2": "bar"}  ],
+			"field1": "morefoo"
+		]
+	}
 	
 	createQuery: function(filter, tables, startObject) {
 		var joins = [];
